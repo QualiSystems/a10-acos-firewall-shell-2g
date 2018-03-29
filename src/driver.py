@@ -1,4 +1,7 @@
-from cloudshell.devices.driver_helper import get_logger_with_thread_id, get_api, get_cli
+from cloudshell.devices.driver_helper import get_logger_with_thread_id, get_api, get_cli, \
+    parse_custom_commands
+from cloudshell.devices.runners.run_command_runner import RunCommandRunner
+from cloudshell.devices.runners.state_runner import StateRunner
 from cloudshell.devices.standards.firewall.configuration_attributes_structure import \
     create_firewall_resource_from_context as create_resource_from_context
 from cloudshell.firewall.firewall_resource_driver_interface import FirewallResourceDriverInterface
@@ -7,6 +10,7 @@ from cloudshell.shell.core.driver_context import InitCommandContext, ResourceCom
 from cloudshell.shell.core.driver_utils import GlobalLock
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 
+from cloudshell.firewall.a10.cli.a10_cli_handler import A10CliHandler as CliHandler
 from cloudshell.firewall.a10.runners.a10_autoload_runner import A10AutoloadRunner as AutoloadRunner
 from cloudshell.firewall.a10.snmp.a10_snmp_handler import A10SnmpHandler as SnmpHandler
 
@@ -64,27 +68,43 @@ class A10AcosFirewallShell2GDriver(ResourceDriverInterface, FirewallResourceDriv
         """
         pass
 
-    def run_custom_command(self, context, cancellation_context, custom_command):
-        """
-        Executes a custom command on the device
-        :param ResourceCommandContext context: The context object for the command with resource and reservation info
-        :param CancellationContext cancellation_context: Object to signal a request for cancellation. Must be enabled in drivermetadata.xml as well
-        :param str custom_command: The command to run. Note that commands that require a response are not supported.
-        :return: the command result text
-        :rtype: str
-        """
-        pass
+    def run_custom_command(self, context, custom_command):
+        """Executes a custom command on the device
 
-    def run_custom_config_command(self, context, cancellation_context, custom_command):
-        """
-        Executes a custom command on the device in configuration mode
-        :param ResourceCommandContext context: The context object for the command with resource and reservation info
-        :param CancellationContext cancellation_context: Object to signal a request for cancellation. Must be enabled in drivermetadata.xml as well
-        :param str custom_command: The command to run. Note that commands that require a response are not supported.
+        :param ResourceCommandContext context: The context object for the command with resource and
+            reservation info
+        :param str custom_command: The command to run
         :return: the command result text
         :rtype: str
         """
-        pass
+
+        logger = get_logger_with_thread_id(context)
+        api = get_api(context)
+
+        resource_config = create_resource_from_context(self.SHELL_NAME, self.SUPPORTED_OS, context)
+        cli_handler = CliHandler(self._cli, resource_config, logger, api)
+
+        command_operations = RunCommandRunner(logger, cli_handler)
+        return command_operations.run_custom_command(parse_custom_commands(custom_command))
+
+    def run_custom_config_command(self, context, custom_command):
+        """Executes a custom command on the device in configuration mode
+
+        :param ResourceCommandContext context: The context object for the command with resource and
+            reservation info
+        :param str custom_command: The command to run
+        :return: the command result text
+        :rtype: str
+        """
+
+        logger = get_logger_with_thread_id(context)
+        api = get_api(context)
+
+        resource_config = create_resource_from_context(self.SHELL_NAME, self.SUPPORTED_OS, context)
+        cli_handler = CliHandler(self._cli, resource_config, logger, api)
+
+        command_operations = RunCommandRunner(logger, cli_handler)
+        return command_operations.run_custom_config_command(parse_custom_commands(custom_command))
 
     def shutdown(self, context, cancellation_context):
         """
@@ -223,16 +243,23 @@ class A10AcosFirewallShell2GDriver(ResourceDriverInterface, FirewallResourceDriv
 
     # </editor-fold>
 
-    # <editor-fold desc="Health Check">
+    def health_check(self, context):
+        """Checks if the device is up and connectable
 
-    def health_check(self,cancellation_context):
+        :param ResourceCommandContext context: ResourceCommandContext object with all Resource
+            Attributes inside
+        :return: Success or fail message
+        :rtype: str
         """
-        Checks if the device is up and connectable
-        :return: str: Success or fail message
-        """
-        pass
 
-    # </editor-fold>
+        logger = get_logger_with_thread_id(context)
+        api = get_api(context)
+
+        resource_config = create_resource_from_context(self.SHELL_NAME, self.SUPPORTED_OS, context)
+        cli_handler = CliHandler(self._cli, resource_config, logger, api)
+
+        state_operations = StateRunner(logger, api, resource_config, cli_handler)
+        return state_operations.health_check()
 
     def cleanup(self):
         """
