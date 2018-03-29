@@ -233,7 +233,8 @@ class A10AcosFirewallShell2GDriver(ResourceDriverInterface, FirewallResourceDriv
         api = get_api(context)
 
         resource_config = create_resource_from_context(self.SHELL_NAME, self.SUPPORTED_OS, context)
-        snmp_handler = SnmpHandler(resource_config, logger, api, None)  # fixme cli_handler
+        cli_handler = CliHandler(self._cli, resource_config, logger, api)
+        snmp_handler = SnmpHandler(resource_config, logger, api, cli_handler)
 
         autoload_operations = AutoloadRunner(resource_config, logger, snmp_handler)
         logger.info('Autoload started')
