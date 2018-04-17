@@ -8,11 +8,6 @@
                                Description="The command to run. Note that commands that require a response are not supported."/>
                 </Parameters>
             </Command>
-            <Command Name="ApplyConnectivityChanges" DisplayName="ApplyConnectivityChanges" Tags="allow_unreserved">
-                <Parameters>
-                    <Parameter Name="request" Type="String" Mandatory = "True" DefaultValue="" Description=""/>
-                </Parameters>
-            </Command>
             <Command Name="orchestration_save" >
                 <Parameters>
                     <Parameter Name="mode" Type="Lookup" Mandatory = "True" AllowedValues="shallow,deep"  DefaultValue="shallow"
@@ -31,7 +26,6 @@
 
                 </Parameters>
             </Command>
-
         </Category>
         <Command Name="health_check"  Tags="" Description="Checks if the device is up and connectable"/>
         <Command Name="run_custom_command" DisplayName="Send Custom Command" Tags="" Description="Executes a custom command on the device">
