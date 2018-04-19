@@ -225,6 +225,8 @@ class A10AcosFirewallShell2GDriver(ResourceDriverInterface, FirewallResourceDriv
         api = get_api(context)
 
         resource_config = create_resource_from_context(self.SHELL_NAME, self.SUPPORTED_OS, context)
+        resource_config.snmp_v3_auth_protocol = 'SHA'  # for now FirewallResource doesn't support
+        resource_config.snmp_v3_priv_protocol = 'AES-128'  # snmp v3 protocols
         cli_handler = CliHandler(self._cli, resource_config, logger, api)
         snmp_handler = SnmpHandler(resource_config, logger, api, cli_handler)
 
