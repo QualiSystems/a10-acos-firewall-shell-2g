@@ -44,6 +44,8 @@ Release: **A10 ACOS Firewall 2G**
 
 * Certified models: A10 vThunder 4.1.4
 
+**Note:** If your CloudShell version does not support this shell, you should consider upgrading to a later version of CloudShell or contact customer support.
+
 ### Data Model
 
 The shell's data model includes all shell metadata, families, and attributes.
